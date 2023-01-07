@@ -188,3 +188,59 @@ class Energy(MovingCameraScene):
         line = Line(start_point,end_point).set_stroke(width=2) 
 
         return line
+
+
+
+M1 = 3.0
+M2 = 1.0
+D1 = 0.3
+D2 = 0.5
+K = 4.0
+
+class System(MovingCameraScene):
+
+    def construct(self):
+
+        dt = 0.05
+        t = np.arange(0, 20, dt)
+
+        x_1 = 0.9
+        x_2 = 2.0
+        x_1_dot = 0.0
+        x_2_dot = 0.0
+        state = np.array([x_1, x_1_dot, x_2, x_2_dot])
+        y = integrate.odeint(self.system, state, t)
+
+        m1x = y[:, 0]
+        m2x = y[:, 2]
+
+        m1mob = Square(0.5).set_fill(BLUE, opacity=0.5)
+        m2mob = Square(0.5).set_fill(RED, opacity=0.5)
+
+        self.camera.frame.set(width=8).move_to(UP * 1.75)
+
+        self.add(m1mob.move_to(m1x[0]*UP), m2mob.move_to(m2x[0]*UP), NumberPlane().set_opacity(0.3), Line(LEFT,RIGHT).move_to(ORIGIN).set_color(WHITE))
+        
+        self.play(m1mob.animate.move_to(m1x[0]*UP + UP), m2mob.animate.move_to(m2x[0]*UP + UP), run_time = 1)
+
+        for i in range(len(m1x)-1):
+            
+            self.play(
+                m1mob.animate.move_to(m1x[i+1]*UP + UP),
+                m2mob.animate.move_to(m2x[i+1]*UP + UP),
+                run_time = dt / 2,
+                rate_func=linear
+            )
+
+        self.wait()
+
+
+    def system(self, state, t):
+        dydx = np.zeros_like(state)
+
+        dydx[0] = state[1]
+        dydx[1] = (-K/M1) * state[0] + (-(D1+D2)/M1) * state[1] + (D2/M1) * state[3]
+        dydx[2] = state[3]
+        dydx[3] = (D2/M2) * state[1] + (-D2/M2) * state[3]
+
+        return dydx
