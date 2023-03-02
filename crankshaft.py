@@ -4,121 +4,72 @@ from manim import *
 class Crankshaft(Scene):
 
     def construct(self):
-        # Crankshaft Black Box
-        crankshaftGroup = VGroup()
-        crankshaftBox = Rectangle(width=4, height=3).set_stroke(color=WHITE, width=2)
+        # Create Crankshaft BlackBox
+        crankshaftBox = Rectangle(width=4, height=2).set_stroke(color=WHITE, width=2)
         crankshaftText = Text("Crankshaft")
-        crankshaftGroup.add(crankshaftBox, crankshaftText)
+        crankshaftBlock = VGroup(crankshaftBox, crankshaftText)
         self.play(Create(crankshaftBox))
-        self.play(Create(crankshaftText))
-        self.wait(2)
-        # Input
-        crankshaftInputText = Text("Torque").move_to(LEFT * 5)
-        self.play(FadeIn(crankshaftInputText), run_time = 0.3)
-        crankshaftInputArrow = Arrow(crankshaftInputText.get_right(), crankshaftBox.get_left())
-        self.play(GrowArrow(crankshaftInputArrow))
+        self.play(FadeIn(crankshaftText))
         self.wait()
-        # Output
-        crankshaftOutputText = Text("Rotation").move_to(RIGHT * 5)
-        crankshaftOutputArrow = Arrow(crankshaftBox.get_right(),crankshaftOutputText.get_left())
-        self.play(GrowArrow(crankshaftOutputArrow))
-        self.play(FadeIn(crankshaftOutputText), run_time = 0.3)
+
+        crankshaftBlockInputText = Text("Torque").next_to(crankshaftBlock, LEFT * 5)
+        crankshaftBlockInputArrow = Arrow(crankshaftBlockInputText.get_right(), crankshaftBox.get_left())
+        self.play(FadeIn(crankshaftBlockInputText), run_time = 0.3)
+        self.play(GrowArrow(crankshaftBlockInputArrow))
         self.wait()
-        # States
+
+        crankshaftBlockOutputText = Text("Rotation").next_to(crankshaftBlock, RIGHT * 5)
+        crankshaftBlockOutputArrow = Arrow(crankshaftBox.get_right(),crankshaftBlockOutputText.get_left())
+        self.play(GrowArrow(crankshaftBlockOutputArrow))
+        self.play(FadeIn(crankshaftBlockOutputText), run_time = 0.3)
+        self.wait()
+
         thetaText = MathTex("\\theta")
         thetaDotText = MathTex("\dot{\\theta}")
         thetaDotDotText = MathTex("\ddot{\\theta}")
-        crankshaftThetaStateTexts = VGroup(thetaText, thetaDotText, thetaDotDotText).arrange(DOWN, center=False, aligned_edge=LEFT).move_to(RIGHT * 4.5).scale(1.5)
-        
-        crankshaftOutputArrow2 = Arrow(crankshaftBox.get_right(),crankshaftThetaStateTexts.get_left())
-        self.play(ReplacementTransform(crankshaftOutputText, crankshaftThetaStateTexts), ReplacementTransform(crankshaftOutputArrow, crankshaftOutputArrow2))
-        self.wait(2)
+        crankshaftOutputStateText = VGroup(thetaText, thetaDotText, thetaDotDotText).arrange(DOWN, center=False, aligned_edge=LEFT).move_to(crankshaftBlockOutputText.get_left())
+        crankshaftBlockOutputArrow2 = Arrow(crankshaftBox.get_right(), crankshaftOutputStateText.get_left())
+        self.play(ReplacementTransform(crankshaftBlockOutputText, crankshaftOutputStateText), ReplacementTransform(crankshaftBlockOutputArrow, crankshaftBlockOutputArrow2))
+        self.wait()
 
-        # Move BlackBox to Corner
-        crankshaftBlackBoxGroup = VGroup(crankshaftGroup, crankshaftInputText, crankshaftInputArrow, crankshaftThetaStateTexts, crankshaftOutputArrow2)
-        self.play(crankshaftBlackBoxGroup.animate.scale(0.5).to_corner(UL-0.5*LEFT), run_time = 0.5)
-        box1 = SurroundingRectangle(crankshaftBlackBoxGroup, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+        # Note the Crankshaft BlackBox
+        crankshaftBlackBoxGroup = VGroup(crankshaftBlockInputText, crankshaftBlockInputArrow, crankshaftBlock, crankshaftBlockOutputArrow2, crankshaftOutputStateText)
+        self.play(crankshaftBlackBoxGroup.animate.scale(0.5).to_corner(UL), run_time = 0.5)
+        box1 = SurroundingRectangle(crankshaftBlackBoxGroup, buff = SMALL_BUFF).set_stroke(color=GREEN, width=1)
         self.play(Create(box1))
+        crankshaftBlackBoxGroup.add(box1)
         self.wait()
 
         # Crankshaft Mathematical Model
-        mathematicalModel = MathTex("I \\frac{d^{2}\\theta}{dt^{2}}", "+", "c \\frac{d\\theta}{dt}", "+", "k\\theta", "=", "T")
-        self.play(Write(mathematicalModel))
+        generalMathematicalModelTex = MathTex("I \\frac{d^{2}\\theta}{dt^{2}}", "+", "c \\frac{d\\theta}{dt}", "+", "k\\theta", "=", "T")
+        self.play(Write(generalMathematicalModelTex))
         self.wait()
-        for i in range(len(mathematicalModel)):
+        for i in range(len(generalMathematicalModelTex)):
             if (i % 2) == 0:
-                self.play(Indicate(mathematicalModel[i]))
+                self.play(Indicate(generalMathematicalModelTex[i]))
         self.wait()
-        mathematicalModelwok = MathTex("I \\frac{d^{2}\\theta}{dt^{2}}", "+", "c \\frac{d\\theta}{dt}", "=", "T")
-        self.play(TransformMatchingTex(mathematicalModel,mathematicalModelwok))
+        mathematicalModelTex = MathTex("I \\frac{d^{2}\\theta}{dt^{2}}", "+", "c \\frac{d\\theta}{dt}", "=", "T")
+        self.play(TransformMatchingTex(generalMathematicalModelTex,mathematicalModelTex))
         self.wait()
-        self.play(mathematicalModelwok.animate.next_to(crankshaftBlackBoxGroup, 2 * RIGHT), run_time = 0.5)
-        box2 = SurroundingRectangle(mathematicalModelwok, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+
+        # Note the Mathematical Model
+        self.play(mathematicalModelTex.animate.scale(0.9).next_to(crankshaftBlackBoxGroup, RIGHT), run_time = 0.5)
+        box2 = SurroundingRectangle(mathematicalModelTex, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
         self.play(Create(box2))
+        mathematicalModelGroup = VGroup(mathematicalModelTex, box2)
         self.wait()
-
-        # Laplace
-        laplaceRaw = MathTex("I(s^{2}\\theta(s)-s\, \\theta(0)-{\\theta}'(0))", "+", "c(s\\theta(s)-\\theta(0))", "=", "T(s)")
-        for i in range(len(laplaceRaw)):
-            self.play(TransformFromCopy(mathematicalModelwok[i], laplaceRaw[i]))
-        self.wait()
-
-        laplace1 = MathTex("I(s^{2}\\theta(s)", "-s\, \\theta(0)-{\\theta}'(0)", ")", "+", "c(s\\theta(s)", "-\\theta(0)", ")", "=", "T(s)")
-        laplace1[1].set_color(YELLOW)
-        laplace1[5].set_color(YELLOW)
-        self.play(FadeTransform(laplaceRaw, laplace1))
-        self.wait()
-        laplace2 = MathTex("Is^{2}\\theta(s)", "+", "c\, s\\theta(s)", "=", "T(s)")
-        self.play(FadeTransform(laplace1, laplace2))
-        self.wait()
-        laplace3 = MathTex("\\theta(s)(Is^{2}+ c\, s)=T(s)")
-        self.play(TransformMatchingShapes(laplace2,laplace3))
-        self.wait()
-        transferFunction = MathTex("\\frac{\\theta(s)}{T(s)} = \\frac{1}{Is^{2}+ c\, s}")
-        self.play(TransformMatchingShapes(laplace3,transferFunction))
-        self.wait()
-        self.play(transferFunction.animate.next_to(mathematicalModelwok, 2 * RIGHT), run_time = 0.5)
-        box3 = SurroundingRectangle(transferFunction, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
-        self.play(Create(box3))
-        self.wait()
-
-        # MATLAB c2d
-        continuesTimeText = Text("Continues Time")
-        discreateTimeText = Text("Discrete Time")
-        c2dText = VGroup(continuesTimeText, discreateTimeText).arrange(RIGHT, buff=3)
-        c2dArrow = Arrow(c2dText[0].get_right(), c2dText[1].get_left())
-        self.play(FadeIn(c2dText[0]))
-        self.play(GrowArrow(c2dArrow),FadeIn(c2dText[1]))
-        self.wait()
-        c2dText.add(c2dArrow)
-        matlabc2dText = Tex("\(>\!\!>\)\, ", "sysd", " = ", "c2d(", "sysc", ", ", "Ts", ")")
-        self.play(FadeTransform(c2dText, matlabc2dText))
-        self.wait()
-        self.play(Indicate(matlabc2dText[1]))
-        self.wait()
-        matlabc2dText[4].set_color(YELLOW)
-        self.play(Indicate(matlabc2dText[4]))
-        self.play(Circumscribe(transferFunction))
-        self.wait()
-        matlabc2dText[4].set_color(WHITE)
-        matlabc2dText[6].set_color(YELLOW)
-        self.play(Indicate(matlabc2dText[6]))
-        self.wait(2)
-        matlabc2dText[6].set_color(WHITE)
-        self.wait()
-        self.play(FadeOut(matlabc2dText))
 
         # Calculate Frequency
-        fEquationTex = MathTex("Sampling\, Frequency", " \\geq ", "20000\, rpm", "\\cdot 2", "\\cdot 10")
-        self.play(Write(fEquationTex), run_time = 3)
-        self.play(Indicate(fEquationTex[2]))
+        frequecyCalculationTex = MathTex("Sampling\, Frequency", " \\geq ", "20000\, rpm", "\\cdot 2", "\\cdot 10")
+        self.play(Write(frequecyCalculationTex), run_time = 3)
+        self.play(Indicate(frequecyCalculationTex[2]))
         self.wait()
-        fEquationTex2 = MathTex("Sampling\, Frequency", " \\geq ", "333\, rps", "\\cdot 2", "\\cdot 10")
-        self.play(TransformMatchingTex(fEquationTex,fEquationTex2))
+        frequecyCalculationTex2 = MathTex("Sampling\, Frequency", " \\geq ", "333\, rps", "\\cdot 2", "\\cdot 10")
+        self.play(TransformMatchingTex(frequecyCalculationTex,frequecyCalculationTex2))
         self.wait()
-        self.play(Indicate(fEquationTex2[3]))
+        self.play(Indicate(frequecyCalculationTex2[3]))
         self.wait()
-        self.play(FadeOut(fEquationTex2))
+        self.play(FadeOut(frequecyCalculationTex2))
 
         # Show Crank-Piston Cycle
         Xoffset = 2 * DOWN
@@ -152,24 +103,53 @@ class Crankshaft(Scene):
         self.play(FadeOut(rod), FadeOut(crank), FadeOut(piston))
 
         # Continue Calculate Frequency
-        self.play(FadeIn(fEquationTex2))
-        self.play(Indicate(fEquationTex2[4]))
+        self.play(FadeIn(frequecyCalculationTex2))
+        self.play(Indicate(frequecyCalculationTex2[4]))
         self.wait()
-        fEquationTex3 = MathTex("Sampling\, Frequency", " \\geq ", "6660\, Hz")
-        self.play(TransformMatchingShapes(fEquationTex2,fEquationTex3))
+        frequecyCalculationTex3 = MathTex("Sampling\, Frequency", " \\geq ", "6660\, Hz")
+        self.play(TransformMatchingShapes(frequecyCalculationTex2, frequecyCalculationTex3))
         self.wait()
-        fTex = MathTex("Sampling\, Frequency", "=", "10000\, Hz")
-        self.play(TransformMatchingShapes(fEquationTex3, fTex))
+        frequecyTex = MathTex("Frequency", "=", "10000\, Hz")
+        self.play(TransformMatchingShapes(frequecyCalculationTex3, frequecyTex))
         self.wait()
-        dtText = MathTex("Sample\, Time", "=", "0.0001\, s")
-        fanddtText = VGroup(fTex, dtText).arrange(DOWN)
-        self.play(TransformMatchingTex(fTex, fanddtText))
+        dtText = MathTex("Sample\, Time\, (dt)", "=", "0.0001\, s")
+        fanddtTex = VGroup(frequecyTex, dtText).arrange(DOWN)
+        self.play(TransformMatchingTex(frequecyTex, fanddtTex))
         self.wait()
 
         # Note the frequency and Sample Time
-        self.play(fanddtText.animate.scale(0.75).next_to(crankshaftBlackBoxGroup, DOWN, buff = MED_LARGE_BUFF).to_edge(0.5*LEFT))
-        box4 = SurroundingRectangle(fanddtText, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+        self.play(fanddtTex.animate.scale(0.8).next_to(mathematicalModelGroup, RIGHT))
+        box3 = SurroundingRectangle(fanddtTex, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+        self.play(Create(box3))
+        fanddtTexGroup = VGroup(fanddtTex, box3)
+
+        # Laplace
+        laplaceRawTex = MathTex("I(s^{2}\\theta(s)-s\, \\theta(0)-{\\theta}'(0))", "+", "c(s\\theta(s)-\\theta(0))", "=", "T(s)")
+        for i in range(len(laplaceRawTex)):
+            self.play(TransformFromCopy(mathematicalModelTex[i], laplaceRawTex[i]))
+        self.wait()
+
+        laplace1 = MathTex("I(s^{2}\\theta(s)", "-s\, \\theta(0)-{\\theta}'(0)", ")", "+", "c(s\\theta(s)", "-\\theta(0)", ")", "=", "T(s)")
+        laplace1[1].set_color(YELLOW)
+        laplace1[5].set_color(YELLOW)
+        self.play(FadeTransform(laplaceRawTex, laplace1))
+        self.wait()
+        laplace2 = MathTex("Is^{2}\\theta(s)", "+", "c\, s\\theta(s)", "=", "T(s)")
+        self.play(FadeTransform(laplace1, laplace2))
+        self.wait()
+        laplace3 = MathTex("\\theta(s)(Is^{2}+ c\, s)=T(s)")
+        self.play(TransformMatchingShapes(laplace2,laplace3))
+        self.wait()
+        transferFunction = MathTex("\\frac{\\theta(s)}{T(s)} = \\frac{1}{Is^{2}+ c\, s}")
+        self.play(TransformMatchingShapes(laplace3,transferFunction))
+        self.wait()
+
+        # Note the TF
+        self.play(transferFunction.animate.scale(0.85).next_to(crankshaftBlackBoxGroup, DOWN).to_edge(0.5 * LEFT), run_time = 0.5)
+        box4 = SurroundingRectangle(transferFunction, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
         self.play(Create(box4))
+        self.wait()
+        transferFunctionGroup = VGroup(transferFunction, box4)
 
         # Calculate Inertia and Damping
         Itext = Tex("I")
@@ -260,7 +240,7 @@ class Crankshaft(Scene):
         # Note the I and c
 
         finalITex = MathTex("I = 0.24465 \, kg/m^{2}").scale(0.75).move_to(Itext.get_center())
-        finalcTex = MathTex("c = 0.32236 \, Nm / \\dot{\\theta}").scale(0.75).move_to(cText.get_center())
+        finalcTex = MathTex("c = 0.32236 \, Nm / \\dot{\\theta}").scale(0.8).move_to(cText.get_center())
 
         self.play(TransformMatchingTex(Itext, finalITex),
                   TransformMatchingTex(cText, finalcTex))
@@ -272,12 +252,41 @@ class Crankshaft(Scene):
         
         coeffsTex = VGroup(finalITex, finalcTex)
         
-        self.play(coeffsTex.animate.arrange(DOWN, buff = SMALL_BUFF).next_to(box4, RIGHT))
+        self.play(coeffsTex.animate.arrange(DOWN, buff = SMALL_BUFF).next_to(transferFunctionGroup, RIGHT))
         self.wait()
 
         box5 = SurroundingRectangle(coeffsTex, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
         self.play(Create(box5))
         self.wait()
+        coeffsTexGroup = VGroup(coeffsTex, box5)
+
+        # Explain MATLAB c2d
+        continuesTimeText = Text("Continues Time")
+        discreateTimeText = Text("Discrete Time")
+        c2dText = VGroup(continuesTimeText, discreateTimeText).arrange(RIGHT, buff=3)
+        c2dArrow = Arrow(c2dText[0].get_right(), c2dText[1].get_left())
+        self.play(FadeIn(c2dText[0]))
+        self.play(GrowArrow(c2dArrow),FadeIn(c2dText[1]))
+        self.wait()
+        c2dText.add(c2dArrow)
+        matlabc2dText = Tex("\(>\!\!>\)\, ", "sysd", " = ", "c2d(", "sysc", ", ", "Ts", ")")
+        self.play(FadeTransform(c2dText, matlabc2dText))
+        self.wait()
+        self.play(Indicate(matlabc2dText[1]))
+        self.wait()
+        matlabc2dText[4].set_color(YELLOW)
+        self.play(Indicate(matlabc2dText[4]))
+        self.play(Circumscribe(transferFunction))
+        self.wait()
+        matlabc2dText[4].set_color(WHITE)
+
+        matlabc2dText[6].set_color(YELLOW)
+        self.play(Indicate(matlabc2dText[6]))
+        self.play(Circumscribe(fanddtTex))
+        self.wait()
+        matlabc2dText[6].set_color(WHITE)
+        self.wait()
+        self.play(FadeOut(matlabc2dText))
 
         # Create Discrete Model
 
@@ -291,8 +300,8 @@ inertia = (0.04 + 0.0515 + 0.01 * 4 + 0.0079 * 4) * 1.5;
 dt = 0.0001;
 c2d(tf(1, [inertia friction 0]), dt)
 '''
-        rendered_code = Code(code=code, language="matlab", line_spacing=0.5, font="Monospace", stroke_width=1.5).move_to(2*DOWN)
-        self.play(Write(rendered_code))
+        rendered_code = Code(code=code, language="matlab", line_spacing=0.5, font="Monospace", stroke_width=1).scale(0.9).move_to(1.5 * DOWN)
+        self.play(FadeIn(rendered_code))
         self.wait()
         result_code = '''ans =
 
@@ -303,26 +312,147 @@ c2d(tf(1, [inertia friction 0]), dt)
 Sample time: 0.0001 seconds
 Discrete-time transfer function.
         '''
-        rendered_result_code = Code(code=result_code, language="c", insert_line_no=False, line_spacing=0.5, font="Monospace", stroke_width=1.5).move_to(2*DOWN)
+        rendered_result_code = Code(code=result_code, language="c", insert_line_no=False, line_spacing=0.5, font="Monospace", stroke_width=1).scale(0.9).move_to(1.5 * DOWN)
         self.play(ReplacementTransform(rendered_code, rendered_result_code))
         self.wait()
 
         # Note Discrete Model
 
-        dtf = MathTex("\\frac{2.044\, e-08\, z + 2.044\, e-08}{z^2 - 2\, z + 0.9999}").move_to(rendered_result_code.get_center())
-        self.play(FadeOut(rendered_result_code), FadeIn(dtf))
+        discreateTimeTransferFunction = MathTex("\\frac{\\theta(z)}{T(z)} = \\frac{2.044\, e-08\, z + 2.044\, e-08}{z^2 - 2\, z + 0.9999}").move_to(rendered_result_code.get_center())
+        self.play(FadeOut(rendered_result_code), FadeIn(discreateTimeTransferFunction))
         self.wait()
 
-        self.play(dtf.animate.scale(0.75).next_to(box5, RIGHT))
-        box6 = SurroundingRectangle(dtf)
-        self.play(Create(box6), buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+        self.play(discreateTimeTransferFunction.animate.scale(0.85).next_to(coeffsTexGroup, RIGHT))
+        box6 = SurroundingRectangle(discreateTimeTransferFunction, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+        self.play(Create(box6))
         self.wait(2)
+        discreateTimeTransferFunctionGroup = VGroup(discreateTimeTransferFunction, box6)
+
+        # Z to Time Domain
+        changeZpower = MathTex("\\frac{\\theta(z)}{T(z)} = \\frac{2.044\, e-08\, z + 2.044\, e-08}{z^2 - 2\, z + 0.9999}", "\\cdot \\frac{z^{-2}}{z^{-2}}")
+        self.play(FadeIn(changeZpower[0]), Circumscribe(discreateTimeTransferFunction))
+        self.wait()
+        self.play(FadeIn(changeZpower[1]))
+        changeZpower2 = MathTex("\\frac{\\theta(z)}{T(z)} = \\frac{2.044\, e-08\, z^{-1} + 2.044\, e-08\, z^{-2}}{z - 2\, z^{-1} + 0.9999\, z^{-2}}")
+        self.play(TransformMatchingShapes(changeZpower, changeZpower2))
+        self.wait()
+        makeEqFalt = MathTex("\\theta(z)z", "- 2\, ", "\\theta(z)z^{-1}", "+ 0.9999\, ", "\\theta(z)z^{-2}", " = 2.044\, e-08\, ", "T(z)z^{-1}", "+ 2.044\, e-08\, ", "T(z)z^{-2}").scale(0.75)
+        self.play(TransformMatchingShapes(changeZpower2, makeEqFalt))
+        self.wait()
+        for i in range(len(makeEqFalt)):
+            if (i % 2) == 0:
+                self.play(makeEqFalt[i].animate.set_color(YELLOW))
+        self.wait()
+        
+        timeDomainEq = MathTex("\\theta(t)", "- 2\, ", "\\theta(t-dt)", "+ 0.9999\, ", "\\theta(t-2dt)", " = 2.044\, e-08\, ", "T(t-dt)", "+ 2.044\, e-08\, ", "T(t-2dt)").scale(0.75).next_to(makeEqFalt, DOWN)
+        for i in range(len(timeDomainEq)):
+            if (i % 2) == 0:
+                timeDomainEq[i].set_color(YELLOW)
+
+        for i in range(len(timeDomainEq)):
+                self.play(TransformFromCopy(makeEqFalt[i], timeDomainEq[i]))
+        self.wait()
+
+        self.play(makeEqFalt.animate.set_color(WHITE))
+        self.play(timeDomainEq.animate.set_color(WHITE))
+
+        self.play(timeDomainEq[1].animate.set_color(YELLOW),
+                  timeDomainEq[2].animate.set_color(YELLOW),
+                  timeDomainEq[3].animate.set_color(YELLOW),
+                  timeDomainEq[4].animate.set_color(YELLOW))
+        
+        self.wait()
+
+        angleEquation = MathTex("\\theta(t)", "= 2\, ", "\\theta(t-dt)", "- 0.9999\, ", "\\theta(t-2dt)", " + 2.044\, e-08\, ", "T(t-dt)", "+ 2.044\, e-08\, ", "T(t-2dt)").scale(0.7).next_to(makeEqFalt, DOWN)
+        self.play(TransformMatchingTex(timeDomainEq, angleEquation))
+        self.wait()
+
+        # Note the TimeDomainEq
+        self.play(FadeOut(makeEqFalt), angleEquation.animate.next_to(transferFunctionGroup, DOWN).to_edge(LEFT))
+        box7 = SurroundingRectangle(angleEquation, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+        self.play(Create(box7))
+        self.wait()
+        angleEquationGroup = VGroup(angleEquation, box7)
+        
+        # Z domain Summary
+        sbox1 = Rectangle(width=4, height=2).set_stroke(color=WHITE, width=2)
+        Text1 = Text("Black Box").move_to(sbox1.get_center())
+        block1 = VGroup(sbox1, Text1)
+
+        sbox2 = Rectangle(width=4, height=2).set_stroke(color=WHITE, width=2)
+        Text2 = Paragraph("Mathematical", "Model", alignment="center").scale(0.8).move_to(sbox2.get_center())
+        block2 = VGroup(sbox2, Text2)
+        
+        sbox3 = Rectangle(width=4, height=2).set_stroke(color=WHITE, width=2)
+        Text3 = Paragraph("Sampling", "Frequency", alignment="center").scale(0.9).move_to(sbox3.get_center())
+        block3 = VGroup(sbox3, Text3)
+
+        sbox4 = Rectangle(width=4, height=2).set_stroke(color=WHITE, width=2)
+        Text4 = Paragraph("S-Domain", "(Laplace)", alignment="center").scale(0.9).move_to(sbox4.get_center())
+        block4 = VGroup(sbox4, Text4)
+
+        sbox5 = Rectangle(width=4, height=2).set_stroke(color=WHITE, width=2)
+        Text5 = Paragraph("Calculate", "Parameters", alignment="center").scale(0.9).move_to(sbox5.get_center())
+        block5 = VGroup(sbox5, Text5)
+
+        sbox6 = Rectangle(width=4, height=2).set_stroke(color=WHITE, width=2)
+        Text6 = Text("Z-Domain").scale(0.9).move_to(sbox6.get_center())
+        block6 = VGroup(sbox6, Text6)
+
+        sbox7 = Rectangle(width=4, height=2).set_stroke(color=WHITE, width=2)
+        Text7 = Paragraph("Time", "Domain", alignment="center").scale(0.9).move_to(sbox7.get_center())
+        block7 = VGroup(sbox7, Text7)
+
+        sbox8 = Rectangle(width=4, height=2).set_stroke(color=WHITE, width=2)
+        Text8 = Paragraph("Arrange", "Equations", alignment="center").scale(0.9).move_to(sbox8.get_center())
+        block8 = VGroup(sbox8, Text8)
+
+        blocksGroupTop = VGroup(block1, block2, block3, block4).arrange(RIGHT, buff= LARGE_BUFF * 1.5).scale(0.6).move_to(1 * DOWN + 0.25 * LEFT)
+        blocksGroupBottom = VGroup(block8, block7, block6, block5).arrange(RIGHT, buff= LARGE_BUFF * 1.5).scale(0.6).next_to(blocksGroupTop, DOWN)
+        
+        for i in range(0,3):
+             blocksGroupTop.add(Arrow(blocksGroupTop[i].get_right(), blocksGroupTop[i+1].get_left(), buff=SMALL_BUFF))
+             blocksGroupBottom.add(Arrow(blocksGroupBottom[3-i].get_left(), blocksGroupBottom[2-i].get_right(), buff=SMALL_BUFF))
+
+        curArrow = CurvedArrow(blocksGroupTop[3].get_right(), blocksGroupBottom[3].get_right(), angle = -PI/2)
+
+        allNotes = VGroup(crankshaftBlackBoxGroup,
+                          mathematicalModelGroup,
+                          fanddtTexGroup,
+                          transferFunctionGroup,
+                          coeffsTexGroup,
+                          discreateTimeTransferFunctionGroup,
+                          angleEquationGroup)
+        
+        for i in range(0,4):
+            self.play(FadeIn(blocksGroupTop[i]))
+            self.play(Circumscribe(allNotes[i], buff = 0))
+            self.wait()
+            if(i < 3):
+                self.play(GrowArrow(blocksGroupTop[i + 4]))
+        
+        self.play(FadeIn(curArrow))
+
+        for i in range(0,3):
+            self.play(FadeIn(blocksGroupBottom[3 - i]))
+            self.play(Circumscribe(allNotes[i + 4], buff = 0))
+            self.wait()
+            self.play(GrowArrow(blocksGroupBottom[i + 4]))
+
+        self.play(FadeIn(blocksGroupBottom[0]))
+        self.wait()
+
+        self.play(FadeOut(blocksGroupBottom), FadeOut(curArrow), run_time = 0.5)
+        self.play(FadeOut(blocksGroupTop), run_time = 0.5)
+        self.play(FadeOut(allNotes[3]), FadeOut(allNotes[4]), FadeOut(allNotes[5]), run_time = 0.5)
+        self.play(angleEquationGroup.animate.next_to(crankshaftBlackBoxGroup, DOWN).to_edge(LEFT))
+        self.wait()
+        
+            
 
 
 
 
-
-    
     def getline(self, Point1, Point2):
         start_point = Point1
         end_point = Point2.get_center()
@@ -339,11 +469,7 @@ Discrete-time transfer function.
 class section(Scene):
 
     def construct(self):
-        self.add(Square())
+        # State Space
+        stateSpaceText = Text("State-Space")
+
         
-
-
-
-
-
-
