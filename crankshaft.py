@@ -444,11 +444,104 @@ Discrete-time transfer function.
 
         self.play(FadeOut(blocksGroupBottom), FadeOut(curArrow), run_time = 0.5)
         self.play(FadeOut(blocksGroupTop), run_time = 0.5)
-        self.play(FadeOut(allNotes[3]), FadeOut(allNotes[4]), FadeOut(allNotes[5]), run_time = 0.5)
-        self.play(angleEquationGroup.animate.next_to(crankshaftBlackBoxGroup, DOWN).to_edge(LEFT))
+
+        # Rearrange Notes
+        self.play(allNotes.animate.move_to(allNotes.get_center() + 0.75 * DOWN), run_time = 0.5)
+        self.play(angleEquationGroup.animate.to_corner(UL))
+        self.play(angleEquationGroup[1].animate.set_stroke(color=RED, width=1))
         self.wait()
+        self.play(FadeOut(allNotes[3]), FadeOut(allNotes[5]))
+        self.play(allNotes[4].animate.next_to(allNotes[0], DOWN).to_edge(LEFT))
+
+
+        # State Space
+        stateSpaceTex = VGroup(MathTex("\dot{x}", "=", "A", "\\cdot",  "x",  "+", "B", "\\cdot", "u"), MathTex("y", "=", "C", "\\cdot", "x", "+", "D", "\\cdot", "u")).scale(1.1).arrange(DOWN, center=True).move_to(DOWN)
+        self.play(Write(stateSpaceTex))
+        self.wait()
+
+        stateSpaceExplainTex =  VGroup(Tex("Derivative of State Vector"),
+                                       Tex("System Matrix"),
+                                       Tex("State Vector"),
+                                       Tex("Input Matrix"),
+                                       Tex("Input Vector"),
+                                       Tex("Output Vector"),
+                                       Tex("Output Matrix"),
+                                       Tex("State Vector"),
+                                       Tex("Feedforward Matrix"),
+                                       Tex("Input Vector")).scale(1.25).set_color(YELLOW).next_to(stateSpaceTex, DOWN)
+
+        e = 0
+        for i in range(2):
+            for j in range(len(stateSpaceTex[i])):
+                if (j % 2) == 0:
+                    self.play(stateSpaceTex[i][j].animate.set_color(YELLOW), FadeIn(stateSpaceExplainTex[e]))
+                    self.wait()
+                    self.play(stateSpaceTex[i][j].animate.set_color(WHITE), FadeOut(stateSpaceExplainTex[e]))
+                    e += 1
+        self.wait()
+
+        # Note the state-space Eq
+        self.play(stateSpaceTex.animate.scale(0.85).next_to(allNotes[4], RIGHT))
+        box8 = SurroundingRectangle(stateSpaceTex, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+        self.play(Create(box8))
+        self.wait()
+        stateSpaceTexGroup = VGroup(stateSpaceTex, box8)
+
+        # Modelling States
+
+        whatisStates = VGroup(MathTex(r"x = \begin{bmatrix} x_{1} \\ x_{2} \end{bmatrix}"), MathTex(r"\dot{x} = \begin{bmatrix} \dot{x}_{1} \\ \dot{x}_{2} \end{bmatrix}")).arrange(RIGHT).move_to(DOWN)
+        self.play(FadeIn(whatisStates[0]))
+        self.wait()
+        self.play(FadeIn(whatisStates[1]))
+        self.wait()
+
+        self.play(whatisStates.animate.scale(0.85).next_to(stateSpaceTexGroup, RIGHT))
+        box9 = SurroundingRectangle(whatisStates, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+        self.play(Create(box9))
+        self.wait()
+        whatisStatesGroup = VGroup(whatisStates, box9)
+
+
+        diffEquation = MathTex("I\, \\ddot{\\theta} + c\, \\dot{\\theta} = T").move_to(DOWN)
+        generaldiffEquation = MathTex("I\, ", "\\ddot{\\theta}", "+ c\, ", "\\dot{\\theta}", "+ k\, ", "\\theta", "= T").move_to(DOWN)
+
+        self.play(TransformFromCopy(mathematicalModelGroup[0],diffEquation))
+        self.wait()
+        self.play(TransformMatchingTex(diffEquation, generaldiffEquation))
+        self.wait()
+
+        self.play(generaldiffEquation[3].animate.set_color(YELLOW), generaldiffEquation[5].animate.set_color(YELLOW))
+        self.wait()
+        self.play(generaldiffEquation[3].animate.set_color(WHITE), generaldiffEquation[5].animate.set_color(WHITE))
+        self.play(generaldiffEquation[1].animate.set_color(YELLOW))
+        self.wait()
+        self.play(generaldiffEquation[1].animate.set_color(WHITE))
+        self.wait()
+
+        changeVariableRow1 = MathTex("x_{1}", "=\\theta")
+        changeVariableRow2 = MathTex("x_{2}", "=\\dot{x}_{1}", "=\\dot{\\theta}")
+        changeVariableRow3 = MathTex("\\dot{x}_{2}", "=\\ddot{x}_{1}", "=\\ddot{\\theta}")
+        changeVariable = VGroup(changeVariableRow1,changeVariableRow2,changeVariableRow3).arrange(DOWN, center=False, aligned_edge=LEFT).next_to(generaldiffEquation, DOWN)
+
+        self.play(FadeIn(changeVariable[0][0]))
+        self.wait()
+        self.play(FadeIn(changeVariable[0][1]))
+        self.wait()
+        for i in range(1,3):
+            for j in range(3):
+                self.play(FadeIn(changeVariable[i][j]))
+                self.wait()
         
-            
+        self.play(changeVariable.animate.scale(0.85).next_to(allNotes[2], 1.5 * DOWN).to_edge(RIGHT))
+        box10 = SurroundingRectangle(changeVariable, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+        self.play(Create(box10))
+        self.wait()
+        changeVariableGroup = VGroup(changeVariable, box10)
+
+        newStates = VGroup(MathTex(r"x = \begin{bmatrix} x_{1} \\ x_{2} \end{bmatrix}"), MathTex(r"\dot{x} = \begin{bmatrix} \dot{x}_{1} \\ \dot{x}_{2} \end{bmatrix}"))
+
+
+
 
 
 
@@ -469,7 +562,59 @@ Discrete-time transfer function.
 class section(Scene):
 
     def construct(self):
-        # State Space
-        stateSpaceText = Text("State-Space")
+        
+        whatisStates = VGroup(MathTex(r"x = \begin{bmatrix} x_{1} \\ x_{2} \end{bmatrix}"), MathTex(r"\dot{x} = \begin{bmatrix} \dot{x}_{1} \\ \dot{x}_{2} \end{bmatrix}"))
+        self.play(FadeIn(whatisStates[0]))
+        self.wait()
+        self.play(TransformMatchingTex(whatisStates[0], whatisStates[1]))
+        self.wait()
+        self.play(FadeOut(whatisStates[1]))
+
+        diffEquation = MathTex("I\, \\ddot{\\theta} + c\, \\dot{\\theta} = T")
+        generaldiffEquation = MathTex("I\, ", "\\ddot{\\theta}", "+ c\, ", "\\dot{\\theta}", "+ k\, ", "\\theta", "= T")
+
+        self.play(TransformFromCopy(mathematicalModelGroup[0],diffEquation))
+        self.wait()
+        self.play(TransformMatchingTex(diffEquation, generaldiffEquation))
+        self.wait()
+
+        self.play(generaldiffEquation[3].animate.set_color(YELLOW), generaldiffEquation[5].animate.set_color(YELLOW))
+        self.wait()
+        self.play(generaldiffEquation[3].animate.set_color(WHITE), generaldiffEquation[5].animate.set_color(WHITE))
+        self.play(generaldiffEquation[1].animate.set_color(YELLOW))
+        self.wait()
+        self.play(generaldiffEquation[1].animate.set_color(WHITE))
+        self.wait()
+
+        changeVariableRow1 = MathTex("x_{1}", "=\\theta")
+        changeVariableRow2 = MathTex("x_{2}", "=\\dot{x}_{1}", "=\\dot{\\theta}")
+        changeVariableRow3 = MathTex("\\dot{x}_{2}", "=\\ddot{x}_{1}", "=\\ddot{\\theta}")
+        changeVariable = VGroup(changeVariableRow1,changeVariableRow2,changeVariableRow3).arrange(DOWN, center=False, aligned_edge=LEFT).next_to(generaldiffEquation, DOWN)
+
+        self.play(FadeIn(changeVariable[0][0]))
+        self.wait()
+        self.play(FadeIn(changeVariable[0][1]))
+        self.wait()
+        for i in range(1,3):
+            for j in range(3):
+                self.play(FadeIn(changeVariable[i][j]))
+                self.wait()
+        
+        self.play(changeVariable.animate.next_to(stateSpaceTexGroup, RIGHT))
+        box9 = SurroundingRectangle(changeVariable, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+        self.play(Create(box9))
+        self.wait()
+        changeVariableGroup = VGroup(changeVariable, box9)
+
+
+        
+
+
+
+
+
+
+
+
 
         
